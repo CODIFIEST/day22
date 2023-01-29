@@ -1,0 +1,44 @@
+{
+  "name": "day22",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.json"
+  },
+  "devDependencies": {
+    "@esbuild-plugins/node-modules-polyfill": "^0.1.4",
+    "@loopring-web/loopring-sdk": "^3.0.24-redPacket",
+    "@sveltejs/vite-plugin-svelte": "^2.0.2",
+    "@tsconfig/svelte": "^3.0.0",
+    "dotenv": "^16.0.3",
+    "svelte": "^3.54.0",
+    "svelte-check": "^2.10.0",
+    "tslib": "^2.4.1",
+    "typescript": "^4.9.3",
+    "vite": "^4.0.4"
+  },
+  "description": "This template should help get you started developing with Svelte and TypeScript in Vite.",
+  "main": "svelte.config.js",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@gamestopnft/detect-gamestop-provider": "^1.0.0",
+    "@imtbl/core-sdk": "^1.0.0",
+    "@imtbl/imx-sdk": "^1.39.1",
+    "@loopring-web/web3-provider": "^1.1.3",
+    "@solana/wallet-adapter-base": "^0.9.20",
+    "@solana/wallet-adapter-wallets": "^0.19.10",
+    "@solana/web3.js": "^1.73.0",
+    "@svelte-on-solana/wallet-adapter-core": "^1.0.11-alpha.0",
+    "alchemy-sdk": "^2.3.0",
+    "axios": "^1.2.2",
+    "buffer": "^6.0.3",
+    "ethers": "^5.7.2",
+    "save": "^2.9.0",
+    "undefined": "^0.1.0"
+  }
+}

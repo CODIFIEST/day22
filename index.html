@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <!-- <script>
+    window.global = window;
+  </script> -->
+  <script type="module">
+    import process from "process";
+    import EventEmitter from "events";
+    import {Buffer} from "buffer";
+    var global = global || window
+    window.Buffer = Buffer;
+    window.process = process;
+    window.EventEmitter = EventEmitter;
+  </script>
+  
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wallet Peeper</title>
+  </head>
+
+  <body>
+<div class="main-container">
+    <div id="app"></div>
+  </div>
+    <script type="module" src="/src/main.ts"></script>
+    <!-- <script>import * as buffer from "buffer";
+      window.Buffer = buffer.Buffer;</script> -->
+  </body>
+  
+</html>
