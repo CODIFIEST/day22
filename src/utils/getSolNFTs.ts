@@ -1,72 +1,88 @@
 import { NFTType, type NFT } from "../domain/nft";
-// not currently supported by solanaJS
- import axios from "axios";
-// import  dotenv from "dotenv"
-// dotenv.config();
-// dotenv.config({ path: `../../.env`} )
-// require('dotenv').config()
-// declare var process : {
-//     env: {
-//       VITE_QUICKNODE_APK: string
-//     }
-//   }
+import axios from "axios";
 
- async function getSolNFTs(address: string): Promise<NFT[]> {
-    const config = {
-        headers: {
-            "Content-Type": "application/json",
-        },
+// Helper interface for the Helius DAS response structure
+interface HeliusAsset {
+  content?: {
+    metadata?: {
+      name?: string;
+      description?: string;
     };
-    const data = {
-        jsonrpc: "2.0",
-        id: 1,
-        method: "qn_fetchNFTs",
-        params: {
-            wallet: address,
-            omitFields: ["provenance", "traits"],
-            page: 1,
-            perPage: 100,
-        },
+    links?: {
+      image?: string;
     };
-    // console.log("address")
-    // console.log(address)
-//  console.log(import.meta.env.VITE_QUICKNODE_APK)
+    files?: {
+      uri?: string;
+    }[];
+  };
+}
 
-    const quiknodeNFTs = await axios.post(import.meta.env.VITE_QUICKNODE_APK, data, config)
-    // console.log(import.meta.env.VITE_QUICKNODE_APK)
-    // console.log("solana wallet data")
-    // console.log (quiknodeNFTs)
-    const domainNFTs:NFT[] =[];
-    quiknodeNFTs.data.result.assets.forEach(nft =>{
+async function getSolNFTs(address: string): Promise<NFT[]> {
+  // Ensure you add VITE_HELIUS_API_KEY to your .env file
+  // Example: VITE_HELIUS_API_KEY=your-api-key-here
+  const apiKey = import.meta.env.VITE_HELIUS_API_KEY;
+  
+  if (!apiKey) {
+    console.error("VITE_HELIUS_API_KEY is missing from environment variables");
+    return [];
+  }
+
+  const url = `https://mainnet.helius-rpc.com/?api-key=${apiKey}`;
+
+  const config = {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  };
+
+  const data = {
+    jsonrpc: "2.0",
+    id: "helius-nft-fetch",
+    method: "getAssetsByOwner",
+    params: {
+      ownerAddress: address,
+      page: 1,
+      limit: 100,
+      displayOptions: {
+        showFungible: false,
+        showNativeBalance: false,
+      },
+    },
+  };
+
+  try {
+    const response = await axios.post(url, data, config);
+    const domainNFTs: NFT[] = [];
+
+    // Helius returns items in result.items, unlike QuickNode's result.assets
+    if (response.data.result && response.data.result.items) {
+      response.data.result.items.forEach((asset: HeliusAsset) => {
+        // Helius stores metadata in 'content.metadata' and images in 'content.links'
+        // We use optional chaining and fallbacks to prevent crashes on missing data
+        const title = asset.content?.metadata?.name || "Unknown NFT";
+        const description = asset.content?.metadata?.description || "";
         
-        const eachNFT:NFT ={
-            title: nft.name,
-            description:nft.description,
-            imageURL: nft.imageUrl,
-            nftType: NFTType.Solana
-        }
-        // console.log("inside getSOLNFTS imgURL", nft.imageURL)
-        // console.log("all the assets ",quiknodeNFTs.data.result.assets)
-        domainNFTs.push(eachNFT)
+        // Helius prioritizes the CDN image link, but falls back to the raw file URI
+        const imageURL = asset.content?.links?.image || asset.content?.files?.[0]?.uri || "";
 
-        // console.log(domainNFTs)
-    })
-    // axios
-    //     .post("https://nameless-falling-market.solana-devnet.discover.quiknode.pro/1251a9caf84a2d2c0b0b318b1b6ddcd57f326d80/", data, config)
-    //     .then(function (response) {
-    //         // handle success
-    //         // console.log("solana wallet data")
-    //         // console.log(response.data);
-          
-    //     })
-    //     .catch((err) => {
-    //         // handle error
-    //         console.log(err);
-          
-    //     });
-    console.log(domainNFTs)
-        return domainNFTs;
-};
+        const eachNFT: NFT = {
+          title: title,
+          description: description,
+          imageURL: imageURL,
+          nftType: NFTType.Solana,
+        };
 
+        domainNFTs.push(eachNFT);
+      });
+    }
 
-export default getSolNFTs
+    // console.log("Mapped Helius NFTs:", domainNFTs);
+    return domainNFTs;
+
+  } catch (error) {
+    console.error("Error fetching Solana NFTs via Helius:", error);
+    return [];
+  }
+}
+
+export default getSolNFTs;
